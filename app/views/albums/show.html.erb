@@ -1,0 +1,63 @@
+<div class="row center">
+  <div class="mb-4">
+    <% if !@album.images.any? %>
+      <div class="alert alert-warning" role="alert">
+        No Album pictures found!!!
+      </div>
+    <% else %>
+      <div class="alert alert-success row" role="alert">
+        <span class=" col-auto w-50">Description : <%=@album.description%></span>
+        <span class="text-end col-auto w-50">Total : <%=@album.images.count%> pictures</span>
+      </div>
+    <% end %>
+      <div class="center row">
+        <%=link_to "Back",root_path,class:"btn btn-light w-25"%>
+        <p class="w-50"></p> 
+        <% if user_signed_in? %>
+          <button class="btn btn-success w-25 addimg">
+            <%= form_with model: @album do |form|%>
+               Add images 
+              <%= form.file_field :images, multiple: true,class:"inputimg"%>
+            <% end %>
+          </button>
+        <% else %>
+          <div class="w-25"></div>
+        <% end %>
+      </div>
+  </div>
+  <div class="row justify-content-center g-4 m-1">
+    <% @album.images.each do |item| %>
+      <div class="col-md-6 col-lg-4 position-relative showcard">
+        <a href=<%=Rails.application.routes.url_helpers.rails_blob_path(item, only_path: true)%> data-fancybox>
+          <img class="showimg" src=<%=Rails.application.routes.url_helpers.rails_blob_path(item, only_path: true)%> />
+        </a>          
+        <% if user_signed_in? %>
+          <%= link_to '<i class="closeIcon bi bi-x-square-fill"></i>'.html_safe, delete_image_album_path(item.id), data: {turbo_method: :delete} %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('.inputimg').change(function(e) {
+      var arrimg = e.target.files;  
+      var valid=false;
+      for (let index = 0; index < arrimg.length; index++) {
+        var element = arrimg[index].name.split('.').pop().toLowerCase();
+        if($.inArray(element,['jpg', 'jpeg', 'png']) == -1){
+          console.log(element);
+          valid=true;
+          break;
+        }
+      }
+      if (arrimg.length > 0 && valid==false) {
+        $(this).parent('form').submit();   
+      }else if(valid==true){
+        valid=false;
+        alert("file should be in jpg, jpeg and png formats");
+      }
+    });
+  });
+</script>
